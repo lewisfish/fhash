@@ -1,7 +1,8 @@
 !> Implements an abstract type for hash keys
 !>
 module fhash_key_base
-  use iso_fortran_env, only: int32, int64
+  use iso_fortran_env, only: int64
+
   implicit none
 
   private

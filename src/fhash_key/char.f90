@@ -57,7 +57,7 @@ module fhash_key_char
   end function key_hash_char
 
 
-  !> Create new key container from a scalar int32
+  !> Create new key container from a scalar char
   function key_from_char(source) result(key)
     character(*), intent(in) :: source
     type(fhash_key_char_t) :: key
