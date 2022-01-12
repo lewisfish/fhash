@@ -85,13 +85,14 @@ function init_tbl_t() result(this)
 
 end function init_tbl_t
 
-subroutine fhash_tbl_next(tbl, key, key_out, type_out)
+subroutine fhash_tbl_next(tbl, key, key_out, type_out, stat)
     
     implicit none
 
     class(fhash_tbl_t), intent(INOUT) :: tbl
     class(fhash_key_t), pointer :: key
     character(len=:), allocatable :: key_out, type_out
+    integer, intent(OUT), optional :: stat
 
     type(fhash_container_t), pointer :: data
     integer :: i, j, max_depth, depth, start, start_depth
@@ -106,6 +107,12 @@ subroutine fhash_tbl_next(tbl, key, key_out, type_out)
 
     start_depth = tbl%depth
     start = tbl%start
+
+    if (present(stat)) stat = 0
+    if(start >= size(tbl%buckets))then
+      if(present(stat))stat = -3
+      return
+    end if
 
     do i = start, size(tbl%buckets)
       max_depth = node_depth(tbl%buckets(i))
