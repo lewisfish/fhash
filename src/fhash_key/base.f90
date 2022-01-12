@@ -14,9 +14,16 @@ module fhash_key_base
     procedure(hash_proc), deferred :: hash
     procedure(equality_proc), deferred :: equals
     generic, public :: operator(==) => equals
+    procedure(to_str_proc), deferred :: to_str
   end type fhash_key_t
 
   abstract interface
+
+    pure function to_str_proc(key) result(str)
+      import
+      class(fhash_key_t), intent(IN) :: key
+      character(len=:), allocatable  :: str
+    end function to_str_proc
 
     pure function equality_proc(key1,key2) result(keys_equal)
       import 

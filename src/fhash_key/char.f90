@@ -17,6 +17,7 @@ module fhash_key_char
   contains
     procedure, pass :: hash => key_hash_char  
     procedure, pass :: equals => key_equal_char
+    procedure, pass :: to_str => char_to_str
   end type fhash_key_char_t
 
   interface fhash_key
@@ -25,6 +26,13 @@ module fhash_key_char
   
   contains
 
+  pure function char_to_str(key) result(str)
+    class(fhash_key_char_t), intent(IN) :: key
+    character(len=:), allocatable :: str
+
+    str = key%value
+
+  end function char_to_str
 
   !> Check if two keys are equal
   pure function key_equal_char(key1,key2) result(keys_equal)

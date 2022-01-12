@@ -17,6 +17,7 @@ module fhash_key_int32
   contains
     procedure, pass :: hash => key_hash_int32  
     procedure, pass :: equals => key_equal_int32
+    procedure, pass :: to_str => int32_to_str
   end type fhash_key_int32_t
 
   interface fhash_key
@@ -25,6 +26,14 @@ module fhash_key_int32
 
 contains
 
+  pure function int32_to_str(key) result(str)
+    class(fhash_key_int32_t), intent(IN) :: key
+    character(len=:), allocatable :: str
+
+    write(str,'(f100.16)') key%value
+    str = trim(adjustl(str))
+
+  end function int32_to_str
 
   !> Check if two keys are equal
   pure function key_equal_int32(key1,key2) result(keys_equal)

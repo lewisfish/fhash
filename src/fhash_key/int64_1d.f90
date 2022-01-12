@@ -17,6 +17,7 @@ module fhash_key_int64_1d
   contains
     procedure, pass :: hash => key_hash_int64_1d  
     procedure, pass :: equals => key_equal_int64_1d
+    procedure, pass :: to_str => int64_1d_to_str
   end type fhash_key_int64_1d_t
 
   interface fhash_key
@@ -25,6 +26,30 @@ module fhash_key_int64_1d
 
 contains
 
+  pure function int64_1d_to_str(key) result(str)
+    class(fhash_key_int64_1d_t), intent(IN) :: key
+    character(len=:), allocatable :: str
+    character(len=:), allocatable :: tmp
+    integer :: i, length, lens(size(key%value)), k
+
+    length = 0
+    lens = 0
+    do i = 1, size(key%value)
+        write(tmp,'(f100.16)')key%value(i)
+        lens(i) = len(tmp)
+        length = length + lens(i)
+    end do
+    length = length + size(key%value)
+
+    str = repeat(" ", length)
+    k = 1
+    do i = 1, size(key%value)
+        write(tmp,'(f100.16)')key%value(i)
+        str(k:k+lens(i)) = tmp//" "
+        k = k + lens(i)+1
+    end do
+
+  end function int64_1d_to_str
 
   !> Check if two keys are equal
   pure function key_equal_int64_1d(key1,key2) result(keys_equal)

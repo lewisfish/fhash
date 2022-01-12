@@ -27,13 +27,14 @@ module fhash_tbl
   type fhash_tbl_t
 
     type(fhash_node_t), allocatable :: buckets(:)
-
+    integer :: start, depth
   contains
 
     procedure :: allocate => fhash_tbl_allocate
     procedure :: unset => fhash_tbl_unset
     procedure :: check_key => fhash_tbl_check_key
     procedure :: stats => fhash_tbl_stats
+    procedure :: next => fhash_tbl_next
     
     procedure :: fhash_tbl_set_scalar
     generic :: set => fhash_tbl_set_scalar
@@ -66,7 +67,97 @@ module fhash_tbl
 
   end type fhash_tbl_t
   
+  interface fhash_tbl_t
+    module procedure init_tbl_t
+  end interface fhash_tbl_t
+
 contains
+
+
+function init_tbl_t() result(this)
+  
+  implicit none
+
+  type(fhash_tbl_t) :: this
+
+  this%start = 1
+  this%depth = 1
+
+end function init_tbl_t
+
+subroutine fhash_tbl_next(tbl, key, key_out, type_out)
+    
+    implicit none
+
+    class(fhash_tbl_t), intent(INOUT) :: tbl
+    class(fhash_key_t), pointer :: key
+    character(len=:), allocatable :: key_out, type_out
+
+    type(fhash_container_t), pointer :: data
+    integer :: i, j, max_depth, depth, start, start_depth
+    character(:), allocatable :: char
+    integer(int32) :: i32
+    integer(int64) :: i64
+    real(sp) :: r32
+    real(dp) :: r64
+    logical :: bool
+    class(*), allocatable :: raw
+    logical :: type_match
+
+    start_depth = tbl%depth
+    start = tbl%start
+
+    do i = start, size(tbl%buckets)
+      max_depth = node_depth(tbl%buckets(i))
+      do j = start_depth, max_depth
+        depth = j
+        call iter_key(tbl%buckets(i), key, depth, max_depth)
+        call fhash_tbl_get_data(tbl,key,data)
+        call data%get(i32,i64,r32,r64,char,bool,raw,type_match,type_out)
+        key_out = key%to_str()
+        tbl%depth = j + 1
+        if(tbl%depth > max_depth)then
+          tbl%depth = 1
+          tbl%start = tbl%start + 1
+        end if
+        return
+      end do
+      tbl%start = tbl%start + 1
+    end do
+
+end subroutine fhash_tbl_next
+
+
+  !> Get key from specfic node.
+  !> Returns a pointer to the 'key' component of the corresponding node.
+  !> Pointer is not associated if key cannot be found
+  recursive subroutine iter_key(node,key,depth,max_depth)
+
+    !> Node to search in
+    type(fhash_node_t), intent(in), target :: node
+
+    !> Key to return
+    class(fhash_key_t), pointer :: key
+    !> Max depth to travese to
+    integer, intent(IN)    :: max_depth
+    !> starting depth
+    integer, intent(INOUT) :: depth
+
+    key => null()
+    if (.not.allocated(node%key)) then
+      return
+    else
+      if(depth == max_depth)then
+        key => node%key
+        return
+      elseif(associated(node%next))then
+        depth = depth + 1
+        call iter_key(node%next, key, depth, max_depth)
+      end if
+    end if
+
+  end subroutine iter_key
+
 
 !> Allocate hash table
 subroutine fhash_tbl_allocate(tbl,size)

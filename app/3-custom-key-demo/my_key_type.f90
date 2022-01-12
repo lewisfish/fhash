@@ -29,6 +29,7 @@ module my_key_type
 
       procedure :: hash => key_hash_string_t
       procedure :: equals => key_equals_string_t
+      procedure :: to_str => string_t_to_str
 
   end type key_string_t
 
@@ -39,6 +40,14 @@ module my_key_type
   end interface fhash_key
 
 contains
+
+  pure function string_t_to_str(key) result(str)
+    class(key_string_t), intent(IN) :: key
+    character(len=:), allocatable :: str
+
+    str = key%value(1)%s
+
+  end function string_t_to_str
 
   !> Implements equality operator for custom key type.
   !> 
