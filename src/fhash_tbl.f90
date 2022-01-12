@@ -15,7 +15,7 @@ module fhash_tbl
 
    !> Error flag for when retrieved data-type does not 
   !>  match that expected by the invoked getter function 
-  !>  (`get_int32`,`get_int63`,`get_float`,'get_double`,`get_char`)
+  !>  (`get_int32`,`get_int64`,`get_float`,'get_double`,`get_char`)
   integer, parameter, public :: FHASH_FOUND_WRONG_TYPE = -2
 
   !> Error flag for when specified key is not found in the hash table
